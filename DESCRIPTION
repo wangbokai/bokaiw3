@@ -1,0 +1,10 @@
+Package: bokaiw3
+Type: Package
+Title: for practice and to finish my BST550 Final Project
+Version: 0.0.1
+Date: 2015-12-14
+Author: Bokai Wang <bokai_wang@urmc.rochester.edu>
+Maintainer: Bokai Wang <bokai_wang@urmc.rochester.edu>
+Description: I just want to practice about creating R packages.
+License: GPL-3
+LazyData: TRUE
