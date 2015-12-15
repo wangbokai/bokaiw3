@@ -1,0 +1,37 @@
+---
+title: "adjCIs"
+author: "[Bokai Wang](bokai_wang@urmc.rochester.edu)"
+output: html_document
+---
+
+## Introduction
+The are two well-characterized reference RNA samples: A is from Universal Human Reference RNA and B is from Human Brain Reference RNA. A and B both from the MAQC consortium, adding spike-ins of synthetic RNA from the External RNA Control Consortium (ERCC). 
+
+Then C is mixed A and B in ratio 3:1 and Dis mixed A and B in ratio 1:3. 
+
+RNA samples A, B, C, and D were analyzed by using the TaqMan RT-PCR technology in the SEQC project. But I found the expression intensity of samples C and D may not be a linear combination (“3:1” or “1:3”) of A and B. So I started this project.
+
+## Concepts
+I take the averages of 4 samples A, B, C and D, and check to see if the issue of "weird" histograms/smoothed density doesn't exist, then investigate the difference in percent of the averages.
+
+Instead of “3:1” (or “1:3”), assume the “true” ratio is “a:b”, thus the expression of sample C = a/(a+b)A + b/(a +b)B (assuming “independence”). 
+
+For sample C, let’s start with using simple linear regression to solve a by fixing b=1, then get a 95% CI about a. Similarly, still for sample C, using simple linear regression to solve b by fixing a=3, then get a 95% CI about b. Like before, but for sample D, let’s start with using simple linear regression to solve a by fixing b=3, then get a 95% CI about a. Similarly, but still for sample D, using simple linear regression to solve b by fixing a=1, then get a 95% CI about b. (results are shown in slides)
+
+If doubt about the SLR method before, then try to use Multiple Linear Regression to solve a and b both, then get (adjusted) 95% CIs about them. (results are shown in slides)
+
+How to choose an appropriate weights? 
+For sample C, want to minimize the percent^2 = ((a/(a+b)A + b/(a+b)B - C)/C)^2 
+= 1/(C^2)(a/(a+b)A + b/(a+b)B – C)^2 (This WLSE = The OLSE of min. percents).
+
+However, it might be more reasonable to use the weighted least squares, then repeat the SLR case for the weighted least squares to solve a or b. Also like before, then try to use Weighted Multiple Linear Regression to solve a and b both, then get (adjusted) 95% CIs about them. (results are shown in slides)
+
+## About this function
+"adjCIs1"" is a function to get 95% CIs for a or b. "fit"" is the model fitted before... and set "level = 0.95"" to get a 95% CI so can change "level = 0.99"" if wanna a 99% CI.
+
+"adjCIs2"" is a function to get 95% CIs for a and b. "fit"" is the model fitted before... and set "level = 0.95"" to get a 95% CI so can change "level = 0.99"" if wanna a 99% CI.
+
+## One Simple Eample
+"slfit1 = lm(exp.C_value.sl1 ~ 0 + exp.A_value)"" is the simple linear regression model to solve a by leting b=1, and get a 95 percent CI for a. Then can show the 95 percent CI for a in this case by using 4*confint(slfit1, level = 0.95).
+
+"mlfit1 = lm(exp.C_value ~ 0 + exp.A_value + exp.B_value)"" is the multiple linear regression model to solve a and b, and get a 95 percent CIs for a and b. Then can construct the 95 percent CIs for the case when a=3? and b=1? by using 4*confint(mlfit1, level = 0.95)[,2]/sum(confint(mlfit1, level = 0.95)[,2]).
