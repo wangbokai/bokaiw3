@@ -1,8 +1,8 @@
-\name{adjCIs-1}
-\alias{adjCIs-1}
+\name{adjCIs1}
+\alias{adjCIs1}
 \title{adjusted 95 percent CIs for ONE parameter of this project}
 \usage{
-4*confint(fit, level = 0.95)
+adjCIs1 = 4*confint(fit, level = 0.95)
 }
 \description{
 Prints 'To show the adjusted 95 percent CI for a or b'.

@@ -1,0 +1,389 @@
+## BST550 Final Project
+rm(list=ls())
+
+## try http if https is not available
+## source("https://bioconductor.org/biocLite.R")
+## biocLite("seqc")
+library("seqc")
+## library(GEOquery)
+
+## Examples
+## ls(2)
+## rownames(taqman)
+## taqman[1:3, ]
+
+## below are two examples to show 3:1 or 1:3 may not be representative #######################################
+(3*taqman$A.A1_value[1]+taqman$B.B1_value[1])/4; taqman$C.C1_value[1]
+(taqman$A.A1_value[1]+3*taqman$B.B1_value[1])/4; taqman$D.D1_value[1]
+
+## show the difference in percent of the above 
+100*((3*taqman$A.A1_value[1]+taqman$B.B1_value[1])/4 - 
+          taqman$C.C1_value[1])/taqman$C.C1_value[1]
+
+100*((taqman$A.A1_value[1]+3*taqman$B.B1_value[1])/4 - 
+          taqman$D.D1_value[1])/taqman$D.D1_value[1]
+##############################################################################################################
+
+## investigate the difference in percent of the 4 replicates #################################################
+## replicate 1 sample C
+diffC1 = 100*((3*taqman$A.A1_value+taqman$B.B1_value)/4 - 
+                taqman$C.C1_value)/taqman$C.C1_value
+
+round(quantile(diffC1, probs = seq(0, 1, 0.1)), 2)
+
+## replicate 1 sample D
+diffD1 = 100*((taqman$A.A1_value+3*taqman$B.B1_value)/4 - 
+                taqman$D.D1_value)/taqman$D.D1_value
+
+round(quantile(diffD1, probs = seq(0, 1, 0.1)), 2)
+
+## replicate 2 sample C
+diffC2 = 100*((3*taqman$A.A2_value+taqman$B.B2_value)/4 - 
+                taqman$C.C2_value)/taqman$C.C2_value
+
+round(quantile(diffC2, probs = seq(0, 1, 0.1)), 2)
+
+## show the sorted diffC2...
+diffC2[order(diffC2, decreasing = T)]
+
+## replicate 2 sample D
+diffD2 = 100*((taqman$A.A2_value+3*taqman$B.B2_value)/4 - 
+                taqman$D.D2_value)/taqman$D.D2_value
+
+round(quantile(diffD2, probs = seq(0, 1, 0.1)), 2)
+
+## replicate 3 sample C
+diffC3 = 100*((3*taqman$A.A3_value+taqman$B.B3_value)/4 - 
+                taqman$C.C3_value)/taqman$C.C3_value
+
+round(quantile(diffC3, probs = seq(0, 1, 0.1)), 2)
+
+## replicate 3 sample D
+diffD3 = 100*((taqman$A.A3_value+3*taqman$B.B3_value)/4 - 
+                taqman$D.D3_value)/taqman$D.D3_value
+
+round(quantile(diffD3, probs = seq(0, 1, 0.1)), 2)
+
+## replicate 4 sample C
+diffC4 = 100*((3*taqman$A.A4_value+taqman$B.B4_value)/4 - 
+                taqman$C.C4_value)/taqman$C.C4_value
+
+round(quantile(diffC4, probs = seq(0, 1, 0.1)), 2)
+
+## replicate 4 sample D
+diffD4 = 100*((taqman$A.A4_value+3*taqman$B.B4_value)/4 - 
+                taqman$D.D4_value)/taqman$D.D4_value
+
+round(quantile(diffD4, probs = seq(0, 1, 0.1)), 2)
+
+## show the sorted diffD4...
+diffD4[order(diffD4, decreasing = T)]
+#############################################################################################################
+
+## draw histgrams to show the dfference in percent of these 4 replicates ####################################
+## for samples of C
+xliml1=-100
+xlimr1=200
+nc1=25
+
+par(mfrow=c(2,2))
+hist(diffC1, xlim=c(xliml1, xlimr1), nclass=nc1)
+hist(diffC2, xlim=c(xliml1, xlimr1), nclass=nc1) 
+hist(diffC3, xlim=c(xliml1, xlimr1), nclass=nc1)
+hist(diffC4, xlim=c(xliml1, xlimr1), nclass=nc1)
+par(mfrow=c(1,1))
+
+par(mfrow=c(2,2))
+plot(density(diffC1), xlim=c(xliml1, xlimr1))
+plot(density(diffC2), xlim=c(xliml1, xlimr1))
+plot(density(diffC3), xlim=c(xliml1, xlimr1))
+plot(density(diffC4), xlim=c(xliml1, xlimr1))
+par(mfrow=c(1,1))
+
+## for samples of D
+xliml2=-100
+xlimr2=200
+nc2=75
+
+par(mfrow=c(2,2))
+hist(diffD1, xlim=c(xliml2, xlimr2), nclass=nc2)
+hist(diffD2, xlim=c(xliml2, xlimr2), nclass=nc2) 
+hist(diffD3, xlim=c(xliml2, xlimr2), nclass=nc2)
+hist(diffD4, xlim=c(xliml2, xlimr2), nclass=nc2)
+par(mfrow=c(1,1))
+
+par(mfrow=c(2,2))
+plot(density(diffD1), xlim=c(xliml2, xlimr2))
+plot(density(diffD2), xlim=c(xliml2, xlimr2))
+plot(density(diffD3), xlim=c(xliml2, xlimr2))
+plot(density(diffD4), xlim=c(xliml2, xlimr2))
+par(mfrow=c(1,1))
+#############################################################################################################
+
+## take the average of 4 samples A, B, C and D ##############################################################
+attach(taqman)
+
+exp.A_value = 1/4*(A.A1_value + A.A2_value + A.A3_value + A.A4_value)
+exp.B_value = 1/4*(B.B1_value + B.B2_value + B.B3_value + B.B4_value)
+
+exp.C_value = 1/4*(C.C1_value + C.C2_value + C.C3_value + C.C4_value)
+exp.D_value = 1/4*(D.D1_value + D.D2_value + D.D3_value + D.D4_value)
+#############################################################################################################
+
+## check to see if the issue above still exists #############################################################
+(3*exp.A_value[1]+exp.B_value[1])/4; exp.C_value[1]
+100*((3*exp.A_value[1]+exp.B_value[1])/4 - exp.C_value[1])/exp.C_value[1]
+
+(exp.A_value[1]+3*exp.B_value[1])/4; exp.D_value[1]
+100*((exp.A_value[1]+3*exp.B_value[1])/4 - exp.D_value[1])/exp.D_value[1]
+
+## investigate the difference in percent of the averages
+## for the average of sample C
+diffC = 100*((3*exp.A_value + exp.B_value)/4 - exp.C_value)/exp.C_value
+
+round(quantile(diffC, probs = seq(0, 1, 0.1)), 2)
+
+## for the average of sample D
+diffD = 100*((exp.A_value + 3*exp.B_value)/4 - exp.D_value)/exp.D_value
+
+round(quantile(diffD, probs = seq(0, 1, 0.1)), 2)
+
+## draw histgrams to show the dfference in percent of the averages of C and D
+## for averages of sample C
+xliml3=-100
+xlimr3=200
+nc3=25
+
+par(mfrow=c(1,2))
+hist(diffC, xlim=c(xliml3, xlimr3), nclass=nc3)
+plot(density(diffC), xlim=c(xliml3, xlimr3))
+par(mfrow=c(1,1))
+
+## show the sorted diffC...
+diffC[order(diffC, decreasing = T)]
+
+## for averages of sample D
+xliml4=-100
+xlimr4=200
+nc4=75
+
+par(mfrow=c(1,2))
+hist(diffD, xlim=c(xliml4, xlimr4), nclass=nc4)
+plot(density(diffD), xlim=c(xliml4, xlimr4))
+par(mfrow=c(1,1))
+
+## show the sorted diffD...
+diffD[order(diffD, decreasing = T)]
+#############################################################################################################
+
+## try to use the lse to estimate the true ratio a and b ####################################################
+## assume (a*A + b*B)/(a + b) =? C
+## x.mat1 = cbind(exp.A_value, exp.B_value)
+
+## fit1 = lsfit(x=x.mat1, y=exp.C_value, wt = NULL, intercept = F, tolerance = 1e-07)
+## fit2 = lsfit(x=x.mat1, y=exp.D_value, wt = NULL, intercept = F, tolerance = 1e-07)
+
+## show the result for sample C and solve for a and b
+## suppose the data is given by a + b = 4
+## then the sol. for the est. of a and b is
+## 4*fit1$coef[1]/(fit1$coef[1] + fit1$coef[2])
+## 4*fit1$coef[2]/(fit1$coef[1] + fit1$coef[2])
+
+## is it ratio 3:1 or not??
+## fit1$coef[1]/fit1$coef[2]
+
+## note that the sum of coefficients of lse is not 1...
+## fit1$coef[1] + fit1$coef[2]
+
+## show the result for sample D and solve for a and b
+## suppose the data is given by a + b = 4
+## then the sol. for the est. of a and b is
+## 4*fit2$coef[1]/(fit2$coef[1] + fit2$coef[2])
+## 4*fit2$coef[2]/(fit2$coef[1] + fit2$coef[2])
+
+## is it ratio 1:3 or not??
+## fit2$coef[1]/fit2$coef[2]
+
+## note that the sum of coefficients of lse is not 1...
+## fit2$coef[1] + fit2$coef[2]
+#############################################################################################################
+
+## because the least squares esti. is a mathematical criterion ##############################################
+## for sample C
+## try to use simple linear regression to sol. a by leting b=1, then do hypotheses about a
+exp.C_value.sl1 = exp.C_value - 1/4*exp.B_value
+
+slfit1 = lm(exp.C_value.sl1 ~ 0 + exp.A_value)
+## summary(slfit1)
+
+## show the 95% CI for a in this case
+4*confint(slfit1, level = 0.95)
+
+## in addition
+## try to use simple linear regression to sol. b by leting a=3, then do hypotheses about b
+exp.C_value.sl2 = exp.C_value - 3/4*exp.A_value
+
+slfit2 = lm(exp.C_value.sl2 ~ 0 + exp.B_value)
+## summary(slfit2)
+
+## show the 95% CI for b in this case
+4*confint(slfit2, level = 0.95)
+
+## for sample D
+## try to use simple linear regression to sol. a by leting b=3, then do hypotheses about a
+exp.D_value.sl1 = exp.D_value - 3/4*exp.B_value
+
+slfit3 = lm(exp.D_value.sl1 ~ 0 + exp.A_value)
+## summary(slfit3)
+
+## show the 95% CI for a in this case
+4*confint(slfit3, level = 0.95)
+
+## in addition
+## try to use simple linear regression to sol. b by leting a=1, then do hypotheses about b
+exp.D_value.sl2 = exp.D_value - 1/4*exp.A_value
+
+slfit4 = lm(exp.D_value.sl2 ~ 0 + exp.B_value)
+## summary(slfit4)
+
+## show the 95% CI for b in this case
+4*confint(slfit4, level = 0.95)
+#############################################################################################################
+
+## I doubt about the slr method before... ###################################################################
+## try to use multi. linear regression to sol. a and b both, then do hypotheses about them
+mlfit1 = lm(exp.C_value ~ 0 + exp.A_value + exp.B_value)
+## summary(mlfit1)
+
+## still note that the sum of coefficients of lse is not 1... but it's quite close to 1...
+mlfit1$coef[1] + mlfit1$coef[2]
+
+## show the p-values of ratio a=3? and b=1? w/ Bonferroni correction
+2*2*(1 - pnorm(abs(mlfit1$coefficients/sum(mlfit1$coefficients) 
+                   - c(0.75, 0.25))/coef(summary(mlfit1))[, "Std. Error"]))
+
+mlfit2 = lm(exp.D_value ~ 0 + exp.A_value + exp.B_value)
+## summary(mlfit2)
+
+## still note that the sum of coefficients of lse is not 1... but it's quite close to 1...
+mlfit2$coef[1] + mlfit2$coef[2]
+
+## show the p-values of ratio a=1? and b=3? w/ Bonferroni correction
+2*2*(1 - pnorm(abs(mlfit2$coefficients/sum(mlfit2$coefficients)
+                   - c(0.25, 0.75))/coef(summary(mlfit2))[, "Std. Error"]))
+
+## construct the 95% CI for the case when a=3? and b=1?
+4*confint(mlfit1, level = 0.95)[,2]/sum(confint(mlfit1, level = 0.95)[,2])
+4*confint(mlfit1, level = 0.95)[,1]/sum(confint(mlfit1, level = 0.95)[,1])
+
+## another way of the 95% CI for the case when a=3? and b=1?
+## 4*(mlfit1$coefficients + 1.96*coef(summary(mlfit1))[, "Std. Error"])/
+## sum(mlfit1$coefficients + 1.96*coef(summary(mlfit1))[, "Std. Error"])
+
+## 4*(mlfit1$coefficients - 1.96*coef(summary(mlfit1))[, "Std. Error"])/
+## sum(mlfit1$coefficients - 1.96*coef(summary(mlfit1))[, "Std. Error"])
+
+## construct the 95% CI for the case when a=1? and b=3?
+4*confint(mlfit2, level = 0.95)[,2]/sum(confint(mlfit2, level = 0.95)[,2])
+4*confint(mlfit2, level = 0.95)[,1]/sum(confint(mlfit2, level = 0.95)[,1])
+
+## another way of the 95% CI for the case when a=1? and b=3?
+## 4*(mlfit2$coefficients + 1.96*coef(summary(mlfit2))[, "Std. Error"])/
+## sum(mlfit2$coefficients + 1.96*coef(summary(mlfit2))[, "Std. Error"])
+
+## 4*(mlfit2$coefficients - 1.96*coef(summary(mlfit2))[, "Std. Error"])/
+## sum(mlfit2$coefficients - 1.96*coef(summary(mlfit2))[, "Std. Error"])
+#############################################################################################################
+
+## However, it might be more reasonable to use the weighted least squares ###################################
+## for sample C
+## try to use simple linear regression to sol. a by leting b=1, then do hypotheses about a...
+exp.C_value.wsl1 = exp.C_value - 1/4*exp.B_value
+
+wslfit1 = lm(exp.C_value.wsl1 ~ 0 + exp.A_value, weights = 1/(exp.C_value)^2)
+## summary(wslfit1)
+
+## show the 95% CI for a in this case
+4*confint(wslfit1, level = 0.95)
+
+## in addition
+## try to use simple linear regression to sol. b by leting a=3, then do hypotheses about b...
+exp.C_value.wsl2 = exp.C_value - 3/4*exp.A_value
+
+wslfit2 = lm(exp.C_value.wsl2 ~ 0 + exp.B_value, weights = 1/(exp.C_value)^2)
+## summary(wslfit2)
+
+## show the 95% CI for b in this case
+4*confint(wslfit2, level = 0.95)
+
+## for sample D
+## try to use simple linear regression to sol. a by leting b=3, then do hypotheses about a...
+exp.D_value.wsl1 = exp.D_value - 3/4*exp.B_value
+
+wslfit3 = lm(exp.D_value.wsl1 ~ 0 + exp.A_value, weights = 1/(exp.D_value)^2)
+## summary(wslfit3)
+
+## show the 95% CI for a in this case
+4*confint(wslfit3, level = 0.95)
+
+## in addition
+## try to use simple linear regression to sol. b by leting a=1, then do hypotheses about b...
+exp.D_value.wsl2 = exp.D_value - 1/4*exp.A_value
+
+wslfit4 = lm(exp.D_value.wsl2 ~ 0 + exp.B_value, weights = 1/(exp.D_value)^2)
+## summary(wslfit4)
+
+## show the 95% CI for b in this case
+4*confint(wslfit4, level = 0.95)
+#############################################################################################################
+
+## to minimize the percent^2 = ((a/(a+b)*A + b/(a+b)*B - C)/C)^2 = (a/(a+b)*A + b/(a+b)*B - C)^2/(C^2)
+## so it might be reasonable to use 1/(C^2) as weights...
+wmlfit1 = lm(exp.C_value ~ 0 + exp.A_value + exp.B_value, weights = 1/(exp.C_value^2))
+## summary(wmlfit1)
+
+## still note that the sum of coefficients of lse is not 1... but it's quite close to 1...
+wmlfit1$coef[1] + wmlfit1$coef[2]
+
+## show the p-values of ratio a=3? and b=1? w/ Bonferroni correction
+2*2*(1 - pnorm(abs(wmlfit1$coefficients/sum(wmlfit1$coefficients) 
+                   - c(0.75, 0.25))/coef(summary(wmlfit1))[, "Std. Error"]))
+
+wmlfit2 = lm(exp.D_value ~ 0 + exp.A_value + exp.B_value, weights = 1/(exp.D_value^2))
+## summary(wmlfit2)
+
+## still note that the sum of coefficients of lse is not 1... but it's quite close to 1...
+wmlfit2$coef[1] + wmlfit2$coef[2]
+
+## show the p-values of ratio a=1? and b=3? w/ Bonferroni correction
+2*2*(1 - pnorm(abs(wmlfit2$coefficients/sum(wmlfit2$coefficients)
+                   - c(0.25, 0.75))/coef(summary(wmlfit2))[, "Std. Error"]))
+
+## construct the 95% CI for the case when a=3? and b=1?
+4*confint(wmlfit1, level = 0.95)[,2]/sum(confint(wmlfit1, level = 0.95)[,2])
+4*confint(wmlfit1, level = 0.95)[,1]/sum(confint(wmlfit1, level = 0.95)[,1])
+
+## another way of the 95% CI for the case when a=3? and b=1?
+## 4*(wmlfit1$coefficients + 1.96*coef(summary(wmlfit1))[, "Std. Error"])/
+## sum(wmlfit1$coefficients + 1.96*coef(summary(wmlfit1))[, "Std. Error"])
+
+## 4*(wmlfit1$coefficients - 1.96*coef(summary(wmlfit1))[, "Std. Error"])/
+## sum(wmlfit1$coefficients - 1.96*coef(summary(wmlfit1))[, "Std. Error"])
+
+## construct the 95% CI for the case when a=1? and b=3?
+4*confint(wmlfit2, level = 0.95)[,2]/sum(confint(wmlfit2, level = 0.95)[,2])
+4*confint(wmlfit2, level = 0.95)[,1]/sum(confint(wmlfit2, level = 0.95)[,1])
+
+## another way of the 95% CI for the case when a=1? and b=3?
+## 4*(wmlfit2$coefficients + 1.96*coef(summary(wmlfit2))[, "Std. Error"])/
+## sum(wmlfit2$coefficients + 1.96*coef(summary(wmlfit2))[, "Std. Error"])
+
+## 4*(wmlfit2$coefficients - 1.96*coef(summary(wmlfit2))[, "Std. Error"])/
+## sum(wmlfit2$coefficients - 1.96*coef(summary(wmlfit2))[, "Std. Error"])
+
+## show AICs and BICs of these diff. models
+AIC(slfit1, slfit2, slfit3, slfit4, mlfit1, mlfit2)
+BIC(slfit1, slfit2, slfit3, slfit4, mlfit1, mlfit2)
+
+AIC(wslfit1, wslfit2, wslfit3, wslfit4, wmlfit1, wmlfit2)
+BIC(wslfit1, wslfit2, wslfit3, wslfit4, wmlfit1, wmlfit2)
